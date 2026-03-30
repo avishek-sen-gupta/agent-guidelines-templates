@@ -1,0 +1,87 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/ccline/ccline",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "jdtls-lsp@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "serena@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review-graph@code-review-graph": true,
+    "claude-mem@thedotmack": true,
+    "ast-grep@ast-grep-marketplace": true,
+    "claude-hud@claude-hud": true,
+    "skill-creator@claude-plugins-official": true,
+    "code-review@awesome-claude-plugins": true,
+    "debugger@awesome-claude-plugins": true,
+    "developer-growth-analysis@awesome-claude-plugins": true,
+    "ddd@context-engineering-kit": true,
+    "sadd@context-engineering-kit": true,
+    "tdd@context-engineering-kit": true,
+    "code-review@context-engineering-kit": true
+  },
+  "extraKnownMarketplaces": {
+    "peek": {
+      "source": {
+        "source": "github",
+        "repo": "Project-White-Rabbit/peek-claude-plugin"
+      }
+    },
+    "code-review-graph": {
+      "source": {
+        "source": "github",
+        "repo": "tirth8205/code-review-graph"
+      }
+    },
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    },
+    "ast-grep-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "ast-grep/agent-skill"
+      }
+    },
+    "awesome-claude-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "ComposioHQ/awesome-claude-plugins"
+      }
+    },
+    "claude-hud": {
+      "source": {
+        "source": "github",
+        "repo": "jarrodwatts/claude-hud"
+      }
+    },
+    "jamie-bitflight-skills": {
+      "source": {
+        "source": "github",
+        "repo": "Jamie-BitFlight/claude_skills"
+      }
+    },
+    "context-engineering-kit": {
+      "source": {
+        "source": "github",
+        "repo": "NeoLabHQ/context-engineering-kit"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "permissions": {
+    "allow": [
+      "Bash(*)"
+    ]
+  }
+}
