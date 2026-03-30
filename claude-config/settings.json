@@ -82,6 +82,8 @@
   "permissions": {
     "allow": [
       "Bash(*)"
-    ]
-  }
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "skipAutoPermissionPrompt": true
 }
