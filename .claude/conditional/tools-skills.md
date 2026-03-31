@@ -6,6 +6,7 @@ Use these installed skills and agents at the right points in the workflow:
 |---|---|---|
 | `/tdd` | Starting a feature or bug fix | Enforces red-green-refactor discipline with structured test-first loop |
 | `/audit-asserts` | Periodic test quality sweeps | Scans test files for assertion-vs-name mismatches |
+| `migration-planner` skill | During brainstorming for type migrations | Auto-triggers when replacing primitives with domain types; injects migration strategies |
 | `/simplify` | After completing implementation | Reviews changed code for reuse, quality, and efficiency opportunities |
 | `claude-mem:smart-explore` | Understanding code structure | Token-optimized tree-sitter AST exploration; use instead of reading full files when you only need function signatures or class outlines |
 | `claude-mem:mem-search` | Continuing work from prior sessions | Searches persistent cross-session memory for "how did we do X last time?" |
