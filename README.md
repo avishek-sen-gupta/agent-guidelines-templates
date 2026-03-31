@@ -31,8 +31,11 @@ Reusable context injection infrastructure and guidelines for AI coding agents, w
 │   ├── code-review.md             #   (review, pr, diff keywords)
 │   ├── refactoring.md             #   (refactor, rename, migrate keywords)
 │   └── tools-skills.md            #   (implement, refactor, verify keywords)
+├── hooks/                         # Git hooks (pre-commit verification gate)
+│   └── pre-commit                 #   Talisman + Black + import-linter + pytest
 └── skills/                        # Reusable custom skills
     ├── audit-asserts/SKILL.md
+    ├── documentation/SKILL.md
     └── migration-planner/SKILL.md
 
 guidelines/                        # Reference material (not copied by setup.sh)
