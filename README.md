@@ -14,12 +14,12 @@ Reusable context injection infrastructure and guidelines for AI coding agents, w
 # 3. CLAUDE.md                         — your project name
 ```
 
+To enable keyword-based conditional injection, install [context-injector](https://github.com/avishek-sen-gupta/context-injector) and configure it to point at the `.claude/conditional/` directory.
+
 ## Repository Structure
 
 ```
 .claude/                           # Copy-ready hook infrastructure
-├── settings.json                  # SessionStart + UserPromptSubmit hooks
-├── classify-prompt.sh             # Keyword classifier → conditional injection
 ├── core/                          # Always loaded on session start
 │   ├── project-context.md         #   Language, purpose, dependencies (template)
 │   ├── workflow.md                #   Phases, verification gate, commit rules
@@ -56,9 +56,11 @@ setup.sh                           # Bootstraps .claude/ into a target repo
 
 1. **SessionStart hook** — `cat .claude/core/*.md` loads all core files into context on every session start, resume, clear, or compact.
 
-2. **UserPromptSubmit hook** — `classify-prompt.sh` reads the user's prompt, matches keywords case-insensitively, and injects only the relevant conditional files. A prompt like "add a new feature" triggers design-principles, testing-patterns, refactoring, and tools-skills. A prompt like "review the diff" triggers only code-review.
+2. **UserPromptSubmit hook** — a keyword classifier reads the user's prompt, matches keywords case-insensitively, and injects only the relevant conditional files from `.claude/conditional/`. A prompt like "add a new feature" triggers design-principles, testing-patterns, refactoring, and tools-skills. A prompt like "review the diff" triggers only code-review.
 
 This keeps the agent's context lean — instructions are injected only when relevant.
+
+> **Note:** The `settings.json` and `classify-prompt.sh` hook scripts that wire up this two-layer injection are provided by the [context-injector](https://github.com/avishek-sen-gupta/context-injector) project. Install that separately and point it at the `.claude/conditional/` directory in this repo.
 
 ### Keyword triggers
 
