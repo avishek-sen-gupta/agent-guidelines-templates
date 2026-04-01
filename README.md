@@ -16,6 +16,12 @@ Reusable context injection infrastructure and guidelines for AI coding agents, w
 
 To enable keyword-based conditional injection, install [context-injector](https://github.com/avishek-sen-gupta/context-injector) and configure it to point at the `.claude/conditional/` directory.
 
+To activate the pre-commit verification gate, symlink the hook into your repo's git hooks directory:
+
+```bash
+ln -s "$(pwd)/.claude/hooks/pre-commit" .git/hooks/pre-commit
+```
+
 ## Repository Structure
 
 ```
