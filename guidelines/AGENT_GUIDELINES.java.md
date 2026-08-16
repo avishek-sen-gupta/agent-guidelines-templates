@@ -1,50 +1,58 @@
 # Java-Specific Agent Guidelines
 
-## Project Context
+The Java layer. Everything language-agnostic lives in the topic files
+(`guardrails.md`, `workflow.md`, `testing.md`, and the rest) — this file holds only
+what changes because the language is Java.
 
-- Primary language: Java.
-- Always run the formatter (e.g., `google-java-format` or IDE-configured formatter) before committing. When test counts are mentioned, verify that count hasn't regressed.
+## Typing
+
+- **Build with `-Xlint:all -Werror`.** Compile with zero warnings; ErrorProne and NullAway must pass clean.
+- **`Object` is banned as a declared type** — no `Object` parameters, fields or return types, and no `Map<String, Object>`. Where a type is hard to express use an interface, a bounded type parameter, or a sealed interface with records for the variants; where it is genuinely unknown at a boundary, bind it into a record there.
+- **No raw types**: `List<Node>` not `List`, `Map<String, Integer>` not `Map` — `Set`, `Optional`, `Stream` and `Iterable` alike.
+- **No JSON-blob types.** `JsonNode` and `Map<String, Object>` are `Object` with extra steps.
+- **Declare `implements`** on the interface a class satisfies rather than relying on it being passed where the interface is expected. The error then lands on the broken class, and implementations stay navigable from the interface.
+
+## Text as a boundary
+
+JSON exists only as text in files and on the wire. On entering the program it becomes a record via `ObjectMapper.readValue`.
+
+- Model and API output meets `readValue` first, into a concrete record.
+- Serialise with `writeValueAsString` in the adapter, at the last possible moment.
+- Anything read from a JSON file becomes a record immediately. Never walk a `JsonNode`.
 
 ## Build
 
-- Use Gradle or Maven as the build tool. Prefer Gradle with Kotlin DSL (`build.gradle.kts`) for new projects.
-- Before committing anything, run `./gradlew spotlessApply` (or equivalent formatter task) on every Java file touched in the change.
-- Before committing anything, run `./gradlew build` to ensure compilation and all checks pass.
+- Gradle or Maven; prefer Gradle with Kotlin DSL (`build.gradle.kts`) for new projects.
+- Always use the `./gradlew` / `./mvnw` wrapper — do not assume a global installation.
+- Before committing, run `./gradlew spotlessApply` on every file touched, then `./gradlew build`.
 
-## Testing Patterns
+## Testing
 
-- Use JUnit 5 for all tests. Do not use JUnit 4 unless maintaining legacy code.
-- Use constructor injection or test-specific factory methods to supply test doubles. Do not use `@MockBean`, `Mockito.mock()` inline, or reflection-based injection. Wire mock implementations through the same dependency injection path as production code.
-- Use `@TempDir` for filesystem tests.
-- Prefer AssertJ over Hamcrest or raw JUnit assertions for readability.
+- JUnit 5. Do not use JUnit 4 unless maintaining legacy code.
+- AssertJ over Hamcrest or raw JUnit assertions.
+- `@TempDir` for filesystem tests.
+- Constructor injection or test-specific factories for test doubles. No `@MockBean`, no inline `Mockito.mock()`, no reflection-based injection — wire fakes through the same DI path as production code.
+- Unit tests in `.../unit/`, integration tests in `.../integration/`.
 
-## Programming Patterns
+## Programming patterns
 
-- Always use fully qualified imports. Do not use wildcard imports (`import java.util.*`).
-- Method parameters must never be null. Use empty collections (`List.of()`, `Map.of()`, `Set.of()`) as defaults where applicable. Use method overloads or builder patterns instead of nullable parameters.
-- If a method has a non-void return type, never return null. Use `Optional<T>` for genuinely optional results, or the null object pattern for domain types.
-- Do not use `Optional` as a field type or method parameter — only as a return type.
-- Favour one top-level class per file.
-- Favour records for immutable data carriers. Use records instead of POJOs or Lombok `@Data`/`@Value` where the class is purely structural.
-- Use sealed interfaces and records for algebraic data types / discriminated unions.
-- Prefer `Stream` pipelines over imperative `for` loops for collection transformations. Do not use `forEach` with side effects as a substitute for a `for` loop — if you need side effects, use a `for` loop explicitly.
-- Mark classes and methods `final` by default. Only open them for extension when there is a concrete need.
-- Use `var` for local variables when the type is obvious from the right-hand side.
-- Prefer `List.of()`, `Map.of()`, `Set.of()` for creating immutable collections. Do not use `Arrays.asList()` or `new ArrayList<>(...)` unless mutability is required.
-- Do not use static methods. EVER. Use injected collaborators or instance methods.
-- Do not use static utility classes. Encapsulate behaviour in objects.
-- Use enums instead of string constants for fixed sets of values.
-- If enums map to behaviour, resolve them into strategy/policy objects as early as possible and inject those objects as dependencies, not the enums.
+- Fully qualified imports. No wildcard imports (`import java.util.*`).
+- Records for immutable data carriers, in place of POJOs or Lombok `@Data`/`@Value`. Sealed interfaces plus records for discriminated unions.
+- `final` by default on classes and methods; open for extension only on concrete need.
+- Parameters are never null — use `List.of()`, `Map.of()`, `Set.of()` as defaults, and overloads or builders instead of nullable parameters.
+- Never return null from a non-void method. Use `Optional<T>` for genuinely optional results, or the null object pattern for domain types. `Optional` is a return type only — never a field or parameter.
+- `List.of()` / `Map.of()` / `Set.of()` for immutable collections; `Arrays.asList()` and `new ArrayList<>(...)` only where mutability is required. Never accept a mutable collection you do not intend to mutate.
+- `Stream` pipelines over imperative loops. Do not use `forEach` with side effects as a substitute for a `for` loop — if you need side effects, write the loop.
+- `var` for locals where the type is obvious from the right-hand side.
+- Enums instead of string constants. Where an enum maps to behaviour, resolve it into a strategy object early and inject that object.
+- No static methods, and no static utility classes.
+- SLF4J for logging. Never `System.out.println`, and never commit print statements.
 
 ## Dependencies
 
 - Java 21+
-- Gradle (Kotlin DSL) or Maven for build management
-- JUnit 5 for testing
-- AssertJ for assertions
-- SLF4J + Logback for logging
-
-## Notes
-
-- Use `./gradlew` (or `./mvnw`) wrapper scripts for all build commands — do not assume a global installation.
-- Favour `slf4j` logging over `System.out.println`. Never commit print statements.
+- Gradle (Kotlin DSL) or Maven
+- JUnit 5, AssertJ
+- Jackson (`ObjectMapper`) for boundary parsing into records
+- ErrorProne + NullAway
+- SLF4J + Logback

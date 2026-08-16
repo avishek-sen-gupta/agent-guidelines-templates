@@ -1,92 +1,91 @@
 # AI Engineering Primitives
 
-Reusable context injection infrastructure and guidelines for AI coding agents, with a focus on Claude Code.
+Reusable guidelines for AI coding agents, with a focus on Claude Code.
+
+Guidance is cut into atomic topic files. A thin `CLAUDE.md` `#import`s the ones you want, so a project chooses its own subset rather than inheriting one monolithic document.
 
 ## Quick Start
 
 ```bash
-# Bootstrap context injection into your project
-./setup.sh /path/to/your-repo
+# From inside the project you want to set up
+cd /path/to/your-repo && /path/to/agent-guidelines-templates/setup.sh
+
+# ...or name the target explicitly, and bring the custom skills along too
+./setup.sh /path/to/your-repo --with-skills
 
 # Then customise:
-# 1. .claude/core/project-context.md  — your language, purpose, dependencies
-# 2. .claude/core/workflow.md          — your formatter, linter, test runner
-# 3. CLAUDE.md                         — your project name
+# 1. guidelines/project-context.md  — your language, purpose, dependencies
+# 2. guidelines/workflow.md         — your formatter, type checker, linter, test runner
+# 3. CLAUDE.md                      — your project name, and which topics to import
 ```
 
-To enable keyword-based conditional injection, install [context-injector](https://github.com/avishek-sen-gupta/context-injector) and configure it to point at the `.claude/conditional/` directory.
-
-To activate the pre-commit verification gate, symlink the hook into your repo's git hooks directory:
-
-```bash
-ln -s "$(pwd)/.claude/hooks/pre-commit" .git/hooks/pre-commit
-```
+For keyword-based conditional injection — loading a topic only when the prompt calls for it — install [context-injector](https://github.com/avishek-sen-gupta/context-injector) and point it at your `guidelines/` directory.
 
 ## Repository Structure
 
 ```
-.claude/                           # Copy-ready hook infrastructure
-├── core/                          # Always loaded on session start
-│   ├── project-context.md         #   Language, purpose, dependencies (template)
-│   ├── workflow.md                #   Phases, verification gate, commit rules
-│   ├── implementation.md          #   Scoping, interaction style, Talisman
-│   └── tools-search.md            #   ast-grep, code-review-graph guidance
-├── conditional/                   # Injected based on prompt keywords
-│   ├── design-principles.md       #   (implement, refactor keywords)
-│   ├── testing-patterns.md        #   (test, tdd, coverage keywords)
-│   ├── code-review.md             #   (review, pr, diff keywords)
-│   ├── refactoring.md             #   (refactor, rename, migrate keywords)
-│   └── tools-skills.md            #   (implement, refactor, verify keywords)
-├── hooks/                         # Git hooks (pre-commit verification gate)
-│   └── pre-commit                 #   Talisman + Black + import-linter + pytest
-└── skills/                        # Reusable custom skills
-    ├── audit-asserts/SKILL.md
-    ├── documentation/SKILL.md
-    └── migration-planner/SKILL.md
-
-guidelines/                        # Reference material (not copied by setup.sh)
-├── AGENT_GUIDELINES.general.md    #   Language-agnostic principles
+guidelines/                        # Atomic topic files — the source of truth
+├── project-context.md             #   Language, purpose, dependencies (fill-in template)
+├── guardrails.md                  #   Non-negotiables: no gold plating, full typing, text-as-boundary
+├── workflow.md                    #   Phases, complexity classification, verification gate, commits
+├── design-principles.md           #   What to reach for before writing new code
+├── programming-patterns.md        #   Code style, types and values, architecture
+├── testing.md                     #   TDD, unit vs integration, assertion quality
+├── refactoring.md                 #   Primitive-to-type migration, working across a codebase
+├── code-review.md                 #   Self-review checklist, severity ladder
+├── interaction-style.md           #   Response shape, interruptions, common mistakes
+├── code-search-tools.md           #   ast-grep, knowledge graph, skills and agents
+├── data-security.md               #   External codebase leakage, Talisman
+│
+│                                  # Language layers (not copied by setup.sh)
 ├── AGENT_GUIDELINES.python.md     #   Python-specific rules
-├── AGENT_GUIDELINES.java.md       #   Java-specific rules
-├── AGENT_GUIDELINES.example.python.md  # Merged example (general + Python)
-└── AGENT_GUIDELINES.example.java.md    # Merged example (general + Java)
+└── AGENT_GUIDELINES.java.md       #   Java-specific rules
+
+skills/                            # Reusable custom skills (copy into your own .claude/skills/)
+├── audit-asserts/SKILL.md
+├── documentation/SKILL.md
+└── migration-planner/SKILL.md
 
 CLAUDE.md                          # Thin #import file (copied by setup.sh)
 PHILOSOPHY.md                      # Core philosophy (immutable)
-setup.sh                           # Bootstraps .claude/ into a target repo
+setup.sh                           # Bootstraps the guideline set into a target repo
 ```
 
 ## How It Works
 
-### Two-layer context injection
+### Composition
 
-1. **SessionStart hook** — `cat .claude/core/*.md` loads all core files into context on every session start, resume, clear, or compact.
+`CLAUDE.md` is a list of `#import` lines and nothing else:
 
-2. **UserPromptSubmit hook** — a keyword classifier reads the user's prompt, matches keywords case-insensitively, and injects only the relevant conditional files from `.claude/conditional/`. A prompt like "add a new feature" triggers design-principles, testing-patterns, refactoring, and tools-skills. A prompt like "review the diff" triggers only code-review.
+```markdown
+# My Project — Agent Instructions
 
-This keeps the agent's context lean — instructions are injected only when relevant.
+#import guidelines/project-context.md
+#import guidelines/guardrails.md
+#import guidelines/workflow.md
+```
 
-> **Note:** The `settings.json` and `classify-prompt.sh` hook scripts that wire up this two-layer injection are provided by the [context-injector](https://github.com/avishek-sen-gupta/context-injector) project. Install that separately and point it at the `.claude/conditional/` directory in this repo.
+Claude Code resolves the imports on session start. Drop a line to drop a topic — a docs-only repo has no use for `programming-patterns.md`, and a repo with no external code under analysis has no use for `data-security.md`.
 
-### Keyword triggers
+### Conditional injection (optional)
 
-| Category | Files injected | Trigger keywords |
-|----------|---------------|-----------------|
-| implement | design-principles, testing-patterns, refactoring, tools-skills | implement, add, build, create, fix, feature, bug, write, migrate, hook, extend... |
-| test | testing-patterns | test, tdd, assert, coverage, xfail, fixture, "integration test"... |
-| refactor | design-principles, refactoring, tools-skills | refactor, rename, extract, split, merge, simplify, restructure... |
+Because each topic is its own file, [context-injector](https://github.com/avishek-sen-gupta/context-injector) can load them on demand instead: a `UserPromptSubmit` hook matches prompt keywords and injects only the relevant files. Keep the always-on topics in `CLAUDE.md` and let the injector handle the rest.
+
+Suggested mapping:
+
+| Category | Topics injected | Trigger keywords |
+|----------|----------------|-----------------|
+| implement | design-principles, programming-patterns, testing, refactoring | implement, add, build, create, fix, feature, bug, write, migrate, extend... |
+| test | testing | test, tdd, assert, coverage, xfail, fixture, "integration test"... |
+| refactor | design-principles, refactoring, code-search-tools | refactor, rename, extract, split, merge, simplify, restructure... |
 | review | code-review | review, pr, diff, check, feedback, critique, approve |
-| verify | testing-patterns, tools-skills | verify, audit, scan, lint, validate, ensure, gate... |
+| verify | testing, workflow | verify, audit, scan, lint, validate, ensure, gate... |
 
-### Static guidelines (alternative)
+### Language layers
 
-If you prefer a single-file approach without hooks:
+The topic files are language-agnostic. `AGENT_GUIDELINES.python.md` and `AGENT_GUIDELINES.java.md` hold only the delta for a given stack — the strict type checker's actual flags, the real serialisation library, the idiomatic collection types.
 
-1. Copy `guidelines/AGENT_GUIDELINES.general.md` as your starting point.
-2. Pick (or create) a language-specific file for your stack.
-3. Merge the two into a single `CLAUDE.md` and drop it into your project root.
-
-See the `example` files in `guidelines/` for what the merged result looks like.
+To use one, copy it into your project's `guidelines/` directory alongside the topics and add it to the `#import` list. If you'd rather have a single document than a directory of topics, concatenate the files you want in import order — the topic split is for composition, not something the agent depends on.
 
 ## Philosophy
 

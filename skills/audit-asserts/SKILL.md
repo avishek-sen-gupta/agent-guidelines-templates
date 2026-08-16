@@ -5,7 +5,7 @@ description: Use when auditing test files for assertion-vs-name mismatches, veri
 
 # Audit Test Assertions
 
-Scan unit and integration tests, verify assertions match what each test name claims to test, file issues for violations, and surface the most urgent ones.
+Scan unit and integration tests, verify assertions match what each test name claims to test, record violations, and surface the most urgent ones.
 
 ## Process
 
@@ -16,16 +16,16 @@ digraph audit {
     "Dispatch parallel audit agents\n(batches of ~20 files)" [shape=box];
     "Each agent: analyze name vs assertions" [shape=box];
     "Merge results, deduplicate" [shape=box];
-    "Check existing beads issues\nfor duplicates" [shape=box];
-    "Create new issues\n(non-duplicate only)" [shape=box];
+    "Check tracker for duplicates" [shape=box];
+    "Record new violations\n(non-duplicate only)" [shape=box];
     "Show P0 and P1 violations" [shape=box];
 
     "Collect test files" -> "Dispatch parallel audit agents\n(batches of ~20 files)";
     "Dispatch parallel audit agents\n(batches of ~20 files)" -> "Each agent: analyze name vs assertions";
     "Each agent: analyze name vs assertions" -> "Merge results, deduplicate";
-    "Merge results, deduplicate" -> "Check existing beads issues\nfor duplicates";
-    "Check existing beads issues\nfor duplicates" -> "Create new issues\n(non-duplicate only)";
-    "Create new issues\n(non-duplicate only)" -> "Show P0 and P1 violations";
+    "Merge results, deduplicate" -> "Check tracker for duplicates";
+    "Check tracker for duplicates" -> "Record new violations\n(non-duplicate only)";
+    "Record new violations\n(non-duplicate only)" -> "Show P0 and P1 violations";
 }
 ```
 
@@ -71,41 +71,32 @@ Split files into batches of ~20. Dispatch one subagent per batch. Each subagent 
 
 Combine all subagent results. Remove duplicate findings (same file + test name reported by overlapping agents). Sort by priority (P0 first).
 
-## Step 4: Check Existing Beads Issues
+## Step 4: Check for Already-Tracked Violations
 
-Before creating issues, search for existing ones:
+Before recording anything, search whatever issue tracker the project uses for open
+items covering the same test. Search on the test name and on terms like "assertion
+mismatch". Skip any violation that already has an open issue.
 
-```bash
-bd search "assertion mismatch"
-bd search "test name"
-bd query "label=audit-asserts AND status=open"
-```
+If the project has no tracker, skip to Step 6 and report the findings directly.
 
-Skip any violation that already has an open issue.
+## Step 5: Record New Violations
 
-## Step 5: Create Issues
+For each violation not already tracked, record one item with:
 
-For each new violation, create a beads issue:
+- **Title:** `Test assertion mismatch: <test_name> in <file>`
+- **Priority:** P0, P1 or P2 as classified above
+- **Type:** bug
+- **Label:** `audit-asserts`, so a later sweep can find them
+- **Body:** what the name claims, what the assertions actually check, and `<path>:<line>`
 
-```bash
-bd create "Test assertion mismatch: <test_name> in <file>" \
-  -p <0-4> \
-  -t bug \
-  -l audit-asserts \
-  -d "Test name claims: <what name says>. Assertions actually check: <what they check>. File: <path>:<line>"
-```
-
-**Priority mapping:** P0 → `-p 0`, P1 → `-p 1`, P2 → `-p 2`
-
-Use `bd find-duplicates --approach mechanical` after bulk creation to catch any near-duplicates.
+Use the project's own tracker CLI or API. After a bulk creation, re-check for
+near-duplicates — batches dispatched in parallel often report the same test twice
+under slightly different wording.
 
 ## Step 6: Show Urgent Violations
 
-```bash
-bd query "label=audit-asserts AND status=open AND priority<=1"
-```
-
-Display as a summary table: file, test name, what's wrong, priority.
+Display the open P0 and P1 items as a summary table: file, test name, what's wrong,
+priority.
 
 ## Quick Reference
 
@@ -117,10 +108,12 @@ Display as a summary table: file, test name, what's wrong, priority.
 
 ## Common Mistakes
 
-**Over-flagging smoke tests.** A test named `test_basic_python_execution` that just runs code without crashing is fine — the name doesn't claim specific behavior.
+**Over-flagging smoke tests.** A test named `test_basic_execution` that just runs code without crashing is fine — the name doesn't claim specific behaviour.
 
-**Ignoring module docstrings.** If the module docstring says "tests verify X and Y" but individual tests only verify X, that's a P2 at the module level, not per-test.
+**Ignoring module-level documentation.** If the module's header comment says "tests verify X and Y" but the individual tests only verify X, that's a P2 at the module level, not per-test.
 
-**Missing the `.value` pattern.** Tests that assert on `tv.value` but ignore `tv.type` when the name mentions "type preservation" — this is a real P1.
+**Asserting on one field of a compound result.** When the result has several parts and the test name claims something about a specific part, check that the assertions actually reach that part. A test named for type preservation that asserts only on the value and never on the type is a real P1 — it would pass with the type discarded.
 
-**Creating duplicate issues.** Always search beads first. Prior audit (#14) found 16 P1s and ~94 P2s — many may already be tracked.
+**Missing ordering assertions on sequences.** When a test name implies a sequence or structure (e.g. "while_loop", "pipeline", "ordering"), check that the assertions verify the *order* of elements, not just their presence. Asserting that the collection is non-empty, or that some element is a member of it, says nothing about arrangement — the test would pass with the elements emitted in any order. Prefer assertions that pin relative positions. Missing ordering is P2 if the name merely implies structure, P1 if the name explicitly claims it.
+
+**Creating duplicate issues.** Always search the tracker first. A prior sweep may already have logged most of what this one finds — a repeat audit that re-files everything buries the new findings.
