@@ -15,3 +15,4 @@ Leaking proprietary identifiers into public git history is catastrophic and effe
   - **Already-listed file changed** — replace its checksum in place. Do not add a second entry for it.
 - Never remove an entry for a file that still needs suppressing.
 - Use the checksum Talisman reports, not one computed by hand — it does not compute them the same way.
+- **No comments in `.talismanrc`.** Entries stand on their own; do not annotate them.
