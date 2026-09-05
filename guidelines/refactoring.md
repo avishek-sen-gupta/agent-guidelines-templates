@@ -6,7 +6,7 @@ Map the blast radius first, and find every construction site structurally (`ast-
 
 - **Push the wrapping to the origin.** Wrap where the value is created — factory, parse boundary, external response — not at every intermediate consumer. If the factory returns the domain type, nothing downstream needs to re-wrap.
 - **No coercion validators.** Never add a validator or post-construction hook that quietly converts a string into the type. It hides the call sites that should have been updated. If validation rejects a value, the caller is wrong — fix the caller.
-- **No defensive type checks.** `x if isinstance(x, T) else T(x)` means the callers disagree. Fix the callers.
+- **No defensive type checks.** A runtime type test that falls back to constructing the type means the callers disagree. Fix the callers.
 - **Validate at construction, not at use.** Reject invalid values — double-wrapping especially — where they are constructed, so the failure lands at the construction site rather than at some distant consumer.
 - **Domain methods over raw extraction.** Add methods to the type instead of pulling the primitive back out and operating on it.
 - **Carry the class, not its rendering.** Holding a type reference deletes the serialise-parse round trip and moves serialisation to the wire, where it belongs.
@@ -21,7 +21,7 @@ Map the blast radius first, and find every construction site structurally (`ast-
 
 - **Grep for the old shape.** A rename the type checker accepts can still leave string literals behind: map keys, fixtures, reflective lookups, config entries. Search for the old name as text, not just as a symbol.
 - **Search for bare-primitive comparisons.** A domain type whose equality rejects the raw primitive fails silently rather than loudly.
-- **Watch for `or None`-style fallbacks.** `result or None` converts a falsy sentinel back to null, breaking the null-object pattern. Use direct pass-through.
+- **Watch for re-nulling fallbacks.** An expression that converts a falsy or absent sentinel back to null breaks the null-object pattern. Use direct pass-through.
 - **Check map-literal arguments separately.** Literals in fixtures are not caught by the same search as keyword arguments. Fixtures feeding serialisation keep primitives; those feeding direct API calls need domain types.
 
 ### Working across the codebase

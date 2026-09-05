@@ -10,12 +10,13 @@ Guidance is cut into atomic topic files. A thin `CLAUDE.md` `#import`s the ones 
 # From inside the project you want to set up
 cd /path/to/your-repo && /path/to/agent-guidelines-templates/setup.sh
 
-# ...or name the target explicitly, and bring the custom skills along too
-./setup.sh /path/to/your-repo --with-skills
+# ...or name the target explicitly, add a language layer, and bring the skills along
+./setup.sh /path/to/your-repo --lang java --with-skills
 
 # Then customise:
 # 1. guidelines/project-context.md  — your language, purpose, dependencies
 # 2. guidelines/workflow.md         — your formatter, type checker, linter, test runner
+#                                     (a language layer supplies these already)
 # 3. CLAUDE.md                      — your project name, and which topics to import
 ```
 
@@ -37,9 +38,21 @@ guidelines/                        # Atomic topic files — the source of truth
 ├── code-search-tools.md           #   ast-grep, knowledge graph, skills and agents
 ├── data-security.md               #   External codebase leakage, Talisman
 │
-│                                  # Language layers (not copied by setup.sh)
-├── AGENT_GUIDELINES.python.md     #   Python-specific rules
-└── AGENT_GUIDELINES.java.md       #   Java-specific rules
+└── lang/                             # Language layers (installed by --lang)
+    ├── java/                         #   Filenames mirror the core topics above
+    │   ├── guardrails.md             #     Object banned, -Werror, Jackson
+    │   ├── workflow.md               #     Gradle wrapper, spotlessApply
+    │   ├── programming-patterns.md   #     records, sealed interfaces, var
+    │   ├── testing.md                #     JUnit 5, AssertJ, @TempDir
+    │   ├── refactoring.md            #     instanceof and orElse(null) fallbacks
+    │   └── project-context.md        #     Suggested Java stack
+    └── python/
+        ├── guardrails.md             #     Any banned, Pyright strict, Pydantic
+        ├── workflow.md               #     uv run, black, pyright, scratchpad
+        ├── programming-patterns.md   #     frozen dataclasses, collections.abc
+        ├── testing.md                #     pytest, tmp_path, xfail
+        ├── refactoring.md            #     isinstance and `or None` fallbacks
+        └── project-context.md        #     Suggested Python stack
 
 skills/                            # Reusable custom skills (copy into your own .claude/skills/)
 ├── audit-asserts/SKILL.md
@@ -71,7 +84,7 @@ Claude Code resolves the imports on session start. Drop a line to drop a topic �
 
 Because each topic is its own file, [context-injector](https://github.com/avishek-sen-gupta/context-injector) can load them on demand instead: a `UserPromptSubmit` hook matches prompt keywords and injects only the relevant files. Keep the always-on topics in `CLAUDE.md` and let the injector handle the rest.
 
-Suggested mapping:
+Suggested mapping. Because overlay filenames mirror core filenames, each category injects the core topic and its `lang/<language>/` counterpart as one unit:
 
 | Category | Topics injected | Trigger keywords |
 |----------|----------------|-----------------|
@@ -83,9 +96,23 @@ Suggested mapping:
 
 ### Language layers
 
-The topic files are language-agnostic. `AGENT_GUIDELINES.python.md` and `AGENT_GUIDELINES.java.md` hold only the delta for a given stack — the strict type checker's actual flags, the real serialisation library, the idiomatic collection types.
+The topic files are language-agnostic. `lang/<language>/` holds only the delta for a given stack — the strict type checker's actual flags, the real serialisation library, the idiomatic collection types.
 
-To use one, copy it into your project's `guidelines/` directory alongside the topics and add it to the `#import` list. If you'd rather have a single document than a directory of topics, concatenate the files you want in import order — the topic split is for composition, not something the agent depends on.
+**Every overlay filename mirrors a core topic filename.** `lang/java/testing.md` specialises `testing.md` and nothing else. Four rules keep the layers from collapsing into each other:
+
+1. **Core states the rule and its rationale in neutral terms.** Core never names a language token, a library, or a CLI command. `guardrails.md` says "the language's *any* type is banned", not `Any`.
+2. **An overlay does exactly one of two things**: bind a neutral rule to a concrete name (`the language's "any"` → `Object`, → `Any`), or add a rule that exists only because the language has that feature (sealed interfaces, `frozen=True`).
+3. **An overlay never restates a core rule it doesn't specialise.** The test: delete the concrete binding from the line. If what remains reads like core, delete the line.
+4. **No overlay without a core parent.** Wanting a new overlay topic means the corresponding core rule is missing — write that first.
+
+`setup.sh --lang java` installs the layer and generates a `CLAUDE.md` that imports each overlay immediately after the topic it specialises, so the delta reads next to the rule it modifies:
+
+```markdown
+#import guidelines/testing.md
+#import guidelines/lang/java/testing.md
+```
+
+If you'd rather have a single document than a directory of topics, concatenate the files in import order — the topic split is for composition, not something the agent depends on.
 
 ## Philosophy
 

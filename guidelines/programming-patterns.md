@@ -15,7 +15,7 @@
 
 - Immutable by default. Objects are constructed complete, with all dependencies injected at construction, and never mutated after.
 - No defensive programming. No null checks, no generic exception handling. If unsure, pause and ask.
-- No null as a default parameter — use empty structures (`{}`, `[]`, `()`).
+- No null as a default parameter — use empty collections.
 - No null returns from non-null return types. Use the null object pattern.
 - Domain-appropriate wrapping types for data crossing function boundaries. Wrap and unwrap at boundary layers only.
 - Read-only collection types for parameters the function does not mutate.

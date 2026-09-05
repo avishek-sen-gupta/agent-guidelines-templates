@@ -1,20 +1,24 @@
 fileignoreconfig:
 - filename: guidelines/data-security.md
-  checksum: e1c1c9a5021d8a5949633866a211be5b7747bf56c6e35fa00515628e21d59acf
+  checksum: bcf5fb39b3deb8c93928e9f848807e097e296811e5eb52bc4a986eb153f28931
 - filename: guidelines/design-principles.md
   checksum: 6b22c098590bfe006953bc1fb467dc36ab434df36011435570debabfcfe4f837
 - filename: guidelines/code-search-tools.md
   checksum: 36bf1c2c62c6879b42b7e32dbcd9e036c8af395f1b702f8adb692960039973dd
 - filename: guidelines/testing.md
-  checksum: c7cd6f58c7c187940925ef889c49333819daffe8b3fe1ef4f87afe18e8d37e50
-- filename: guidelines/AGENT_GUIDELINES.java.md
-  checksum: d09fb0e7b7edbffa95c17ed3ffac95e2e57ded5939a2c33107b3b3ad549fecca
+  checksum: e4094fa4c5d3f3f6f5a61865b11bc8628cc44fe4b25515d61617b7def8afdf94
 - filename: guidelines/refactoring.md
-  checksum: 74a5b2e3f12f4ef17370635608e79597dbacfeb6c470690a0eb1d4992c0288d2
+  checksum: dffcd3d3e87c7a44ef63196db3216ebe9315a016b88319e7539cdaf6bf22f2f2
 - filename: guidelines/workflow.md
-  checksum: d4bcaa6f83ea35522ff2ae2c64cd58f08cdd549b3d3a3a070ca61b4c40868c6c
+  checksum: 314e3ac26045408268805b3ab0525e61f62d68c940888f8dbdeada2fd004f0ac
 - filename: README.md
-  checksum: 2285e92d535dde4855b7ff98e051ee18818708a3890cb2f1776a662203d4072e
+  checksum: 2c1a2feafe0751f4c3708e974ef9d32191e87b477afebee0fe0e758ee6705679
 - filename: setup.sh
-  checksum: 3402fc7f92a7cb4af57865a1dcfd868739e54819ab63508fa5bee7eecea8b2c6
+  checksum: 177056983d2c012655e94d5d5eebfa25e74b79b9dec23eb989cca3357c0b193c
+- filename: guidelines/lang/java/guardrails.md
+  checksum: aee1fd60e38a76831fa16701c0a79c0c22a2019092b94202efbc4e6f1949cadd
+- filename: guidelines/lang/java/refactoring.md
+  checksum: eeee2310969693589ae41790259aa758939839b9f4a048d3c20c5931104a5ab0
+- filename: guidelines/lang/python/testing.md
+  checksum: b62087be3775094d4985e8bfc4f2b0ef0a836e013c9782f47d50eeae46cb3afa
 version: "1.0"

@@ -24,7 +24,8 @@ Classify before starting; this sets how much ceremony is needed.
 
 ### Verification gate
 
-Run all of these before every commit. Adapt to your project's tooling:
+Run all of these before every commit. If you imported a language layer, its
+`workflow.md` already substitutes the concrete commands; otherwise fill them in.
 
 ```bash
 <formatter> .        # e.g. black, prettier, google-java-format
