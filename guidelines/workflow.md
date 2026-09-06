@@ -36,6 +36,17 @@ Run all of these before every commit. If you imported a language layer, its
 
 Do not commit if any check fails. Fix, then re-run all of them. Non-negotiable.
 
+**Prefer a machine-checkable gate to a written rule.** A convention that a
+checker can decide belongs in the linter slot above, not only in these files:
+prose is advisory and degrades as a session grows, while a gate fails the commit
+the same way every time. When a rule here has a corresponding check, the check is
+the enforcement and this document is the rationale. Adding a rule is therefore
+two questions — what does it say, and what fails the build when it is broken? If
+nothing can, say so, so the reader knows it rests on review alone.
+
+Never silence a gate to make a commit pass. A violation is either a defect to fix
+or a rule to change deliberately, in its own commit, with the reason recorded.
+
 ### Commits and state
 
 - One logical unit per commit, even when mechanical. Each commit carries its own tests and is separately reviewable and revertible.

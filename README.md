@@ -114,6 +114,12 @@ The topic files are language-agnostic. `lang/<language>/` holds only the delta f
 
 If you'd rather have a single document than a directory of topics, concatenate the files in import order — the topic split is for composition, not something the agent depends on.
 
+### Executable gates
+
+Prose is advisory and degrades as a session grows; a gate fails the commit the same way every time. Where a rule here is decidable by a checker, pair it with one — the checker is the enforcement and these files are the rationale.
+
+For Python that pairing is [python-fp-lint](https://github.com/avishek-sen-gupta/python-fp-lint), which fills the linter slot in the verification gate and mechanically enforces a large share of `guardrails.md`, `programming-patterns.md` and `testing.md`: the mutation and `for`-loop rules, `frozen=True` dataclasses, the `Any`/`object` ban, no `None` defaults, no null checks or blind `except`, no static utility classes, function size and nesting ceilings, `print` and relative imports, and the concrete-assertion and xfail-reason test rules. `guidelines/lang/python/workflow.md` maps each guideline to the rules that check it, names the rules that no checker covers, and covers installation and the pre-commit gate.
+
 ## Philosophy
 
 See [PHILOSOPHY.md](PHILOSOPHY.md) — engineer-owned, toolkit-first, anti-vendor, infrastructure-neutral.
