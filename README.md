@@ -38,6 +38,9 @@ guidelines/                        # Atomic topic files — the source of truth
 ├── code-search-tools.md           #   ast-grep, knowledge graph, skills and agents
 ├── data-security.md               #   External codebase leakage, Talisman
 │
+├── project/                          # This repo's own overlays (ship blank)
+│   └── workflow.md                   #   Imported last, so it has the final word
+│
 └── lang/                             # Language layers (installed by --lang)
     ├── java/                         #   Filenames mirror the core topics above
     │   ├── guardrails.md             #     Object banned, -Werror, Jackson
@@ -78,7 +81,7 @@ setup.sh                           # Bootstraps the guideline set into a target 
 @guidelines/workflow.md
 ```
 
-Claude Code resolves the imports on session start. Drop a line to drop a topic — a docs-only repo has no use for `programming-patterns.md`, and a repo with no external code under analysis has no use for `data-security.md`.
+Claude Code resolves the imports on session start. Paths resolve relative to the file holding the import, so these lines assume `CLAUDE.md` sits beside `guidelines/`. Import parsing skips code spans and fenced blocks, so a path in backticks stays literal text. Drop a line to drop a topic — a docs-only repo has no use for `programming-patterns.md`, and a repo with no external code under analysis has no use for `data-security.md`.
 
 ### Conditional injection (optional)
 
@@ -113,6 +116,24 @@ The topic files are language-agnostic. `lang/<language>/` holds only the delta f
 ```
 
 If you'd rather have a single document than a directory of topics, concatenate the files in import order — the topic split is for composition, not something the agent depends on.
+
+### Project overlay
+
+`project/` is the mirror image of `lang/`: the same filenames again, holding
+what is true of this one repository and nothing else. `setup.sh` installs the
+files blank and never overwrites one that already has content.
+
+`CLAUDE.md` imports them last, after the core topic and any language overlay, so
+the narrowest statement is the one the agent reads last:
+
+```markdown
+@guidelines/workflow.md
+@guidelines/lang/python/workflow.md
+@guidelines/project/workflow.md
+```
+
+Rule 4 of the language layers holds here too — no overlay without a core parent.
+A repo-specific rule with no neutral rule above it belongs in core first.
 
 ### Executable gates
 

@@ -46,6 +46,9 @@ Writes into <target-repo-path>:
   guidelines/*.md     the guideline topic files
   guidelines/lang/<language>/*.md
                       the language layer (only with --lang)
+  guidelines/project/*.md
+                      blank placeholders for this repo's own overlays; an
+                      existing file is left untouched
   CLAUDE.md           thin @-import file listing those topics; any existing
                       CLAUDE.md is first backed up to CLAUDE.md.old
   .claude/skills/     the custom skills (only with --with-skills)
@@ -140,6 +143,18 @@ if [ -n "$LANG_LAYER" ]; then
   echo "Copying the $LANG_LAYER language layer..."
   mkdir -p "$TARGET_GUIDELINES/lang/$LANG_LAYER"
   cp "$SOURCE_GUIDELINES/lang/$LANG_LAYER"/*.md "$TARGET_GUIDELINES/lang/$LANG_LAYER/"
+fi
+
+# The project overlay is where the target repo's own specifics go, so these
+# files ship blank and an existing one is never clobbered.
+if [ -d "$SOURCE_GUIDELINES/project" ]; then
+  echo "Copying the project overlay placeholders..."
+  mkdir -p "$TARGET_GUIDELINES/project"
+  for f in "$SOURCE_GUIDELINES/project"/*.md; do
+    [ -f "$f" ] || continue
+    [ -e "$TARGET_GUIDELINES/project/$(basename "$f")" ] ||
+      cp "$f" "$TARGET_GUIDELINES/project/"
+  done
 fi
 
 if [ -f "$TARGET/CLAUDE.md" ]; then
