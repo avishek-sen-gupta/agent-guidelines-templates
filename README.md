@@ -2,7 +2,7 @@
 
 Reusable guidelines for AI coding agents, with a focus on Claude Code.
 
-Guidance is cut into atomic topic files. A thin `CLAUDE.md` `#import`s the ones you want, so a project chooses its own subset rather than inheriting one monolithic document.
+Guidance is cut into atomic topic files. A thin `CLAUDE.md` imports the ones you want with Claude Code's `@path` syntax, so a project chooses its own subset rather than inheriting one monolithic document.
 
 ## Quick Start
 
@@ -59,7 +59,7 @@ skills/                            # Reusable custom skills (copy into your own 
 ├── documentation/SKILL.md
 └── migration-planner/SKILL.md
 
-CLAUDE.md                          # Thin #import file (copied by setup.sh)
+CLAUDE.md                          # Thin @-import file (copied by setup.sh)
 PHILOSOPHY.md                      # Core philosophy (immutable)
 setup.sh                           # Bootstraps the guideline set into a target repo
 ```
@@ -68,14 +68,14 @@ setup.sh                           # Bootstraps the guideline set into a target 
 
 ### Composition
 
-`CLAUDE.md` is a list of `#import` lines and nothing else:
+`CLAUDE.md` is a list of `@path` import lines and nothing else:
 
 ```markdown
 # My Project — Agent Instructions
 
-#import guidelines/project-context.md
-#import guidelines/guardrails.md
-#import guidelines/workflow.md
+@guidelines/project-context.md
+@guidelines/guardrails.md
+@guidelines/workflow.md
 ```
 
 Claude Code resolves the imports on session start. Drop a line to drop a topic — a docs-only repo has no use for `programming-patterns.md`, and a repo with no external code under analysis has no use for `data-security.md`.
@@ -108,8 +108,8 @@ The topic files are language-agnostic. `lang/<language>/` holds only the delta f
 `setup.sh --lang java` installs the layer and generates a `CLAUDE.md` that imports each overlay immediately after the topic it specialises, so the delta reads next to the rule it modifies:
 
 ```markdown
-#import guidelines/testing.md
-#import guidelines/lang/java/testing.md
+@guidelines/testing.md
+@guidelines/lang/java/testing.md
 ```
 
 If you'd rather have a single document than a directory of topics, concatenate the files in import order — the topic split is for composition, not something the agent depends on.

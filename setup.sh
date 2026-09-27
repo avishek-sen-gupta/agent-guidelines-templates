@@ -46,7 +46,7 @@ Writes into <target-repo-path>:
   guidelines/*.md     the guideline topic files
   guidelines/lang/<language>/*.md
                       the language layer (only with --lang)
-  CLAUDE.md           thin #import file listing those topics; any existing
+  CLAUDE.md           thin @-import file listing those topics; any existing
                       CLAUDE.md is first backed up to CLAUDE.md.old
   .claude/skills/     the custom skills (only with --with-skills)
 
@@ -155,12 +155,12 @@ echo "Writing CLAUDE.md..."
 while IFS= read -r line || [ -n "$line" ]; do
   printf '%s\n' "$line" >>"$TARGET/CLAUDE.md"
   case "$line" in
-    '#import guidelines/'*.md)
+    '@guidelines/'*.md)
       [ -n "$LANG_LAYER" ] || continue
-      topic="${line#\#import guidelines/}"
+      topic="${line#@guidelines/}"
       overlay="lang/$LANG_LAYER/$topic"
       if [ -f "$SOURCE_GUIDELINES/$overlay" ]; then
-        printf '#import guidelines/%s\n' "$overlay" >>"$TARGET/CLAUDE.md"
+        printf '@guidelines/%s\n' "$overlay" >>"$TARGET/CLAUDE.md"
       fi
       ;;
   esac
@@ -194,7 +194,7 @@ else
   echo "     Or re-run with --lang <language> to have a language layer supply them."
 fi
 echo ""
-echo "  3. Trim the #import list in $TARGET/CLAUDE.md"
+echo "  3. Trim the @-import list in $TARGET/CLAUDE.md"
 echo "     Drop topics that don't apply to your project."
 echo ""
 echo "  4. Update the project name in $TARGET/CLAUDE.md"
