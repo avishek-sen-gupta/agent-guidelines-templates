@@ -11,3 +11,4 @@
 #import guidelines/interaction-style.md
 #import guidelines/code-search-tools.md
 #import guidelines/data-security.md
+#import guidelines/project/workflow.md
